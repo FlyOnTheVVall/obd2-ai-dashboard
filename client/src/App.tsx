@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import type { AiDiagnosis, ObdScan } from "./types/obd";
 
-import { fetchLiveObdSnapshot, fetchMockObdScan } from "./services/obdApi";
+import { fetchLiveObdSnapshot } from "./services/obdApi";
 import { requestAiDiagnosis } from "./services/aiApi";
 import {
   fetchScanHistory,
@@ -34,6 +34,13 @@ import BlackBoxDashboard, {
   type BlackBoxSection
 } from "./components/blackbox/BlackBoxDashboard";
 
+import {
+  demoTundraDiagnosis,
+  demoTundraMonitoringStatus,
+  demoTundraScan,
+  demoTundraSymptoms,
+} from "./data/demoDashboardData";
+
 type ScanSource = "simulated" | "live" | null;
 
 type EmptyModuleProps = {
@@ -64,6 +71,7 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isMonitoringBusy, setIsMonitoringBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [activeSection, setActiveSection] =
     useState<BlackBoxSection>("home");
 
@@ -92,6 +100,10 @@ function App() {
   }
 
   useEffect(() => {
+    if (isDemoMode) {
+    return;
+    }
+
     void loadMonitoringStatus();
 
     const interval = window.setInterval(() => {
@@ -99,9 +111,10 @@ function App() {
     }, 5000);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [isDemoMode]);
 
   async function handleStartMonitoring() {
+    setIsDemoMode(false);
     setIsMonitoringBusy(true);
     setErrorMessage(null);
     setSaveMessage(null);
@@ -134,27 +147,45 @@ function App() {
     }
   }
 
-  async function runSimulatedScan() {
+  function runSimulatedScan() {
     setIsScanning(true);
     setErrorMessage(null);
     setSaveMessage(null);
+    setIsDemoMode(true);
 
-    try {
-      const scanData = await fetchMockObdScan();
+    const createdAt = new Date().toISOString();
+
+    const scanData: ObdScan = {
+      ...demoTundraScan,
+      id: `demo-tundra-${Date.now()}`,
+      createdAt,
+    };
+
+    const demoStatus: MonitoringStatus = {
+      ...demoTundraMonitoringStatus,
+      startedAt: new Date(Date.now() - 26 * 60_000).toISOString(),
+      lastSampleAt: createdAt,
+      latestSnapshot: scanData,
+      activeAlerts: demoTundraMonitoringStatus.activeAlerts.map((alert) => ({
+        ...alert,
+        createdAt,
+      })),
+    };
+
+    window.setTimeout(() => {
       setScan(scanData);
       setScanSource("simulated");
-      setDiagnosis(null);
+      setDiagnosis(demoTundraDiagnosis);
+      setSymptoms(demoTundraSymptoms);
+      setMonitoringStatus(demoStatus);
       setLastSavedScanId(null);
-      setActiveSection("data");
-    } catch (error) {
-      console.error("Simulated scan failed:", error);
-      setErrorMessage("Failed to fetch simulated OBD-II scan data.");
-    } finally {
+      setActiveSection("home");
       setIsScanning(false);
-    }
+    }, 400);
   }
 
   async function runLiveScan() {
+    setIsDemoMode(false);
     setIsScanning(true);
     setErrorMessage(null);
     setSaveMessage(null);
@@ -178,6 +209,23 @@ function App() {
 
   async function analyzeWithAi() {
     if (!scan) return;
+
+    if (isDemoMode) {
+      setIsAnalyzing(true);
+      setErrorMessage(null);
+      setSaveMessage(null);
+
+      window.setTimeout(() => {
+        setDiagnosis(demoTundraDiagnosis);
+        setSaveMessage(
+          "Analysis complete — Bank 1 exhaust leak pattern detected."
+        );
+        setActiveSection("ai");
+        setIsAnalyzing(false);
+      }, 900);
+
+      return;
+    }
 
     setIsAnalyzing(true);
     setErrorMessage(null);
@@ -366,6 +414,7 @@ function App() {
   const dashboardMonitoringStatus = monitoringStatus
     ? {
         isEnabled: monitoringStatus.isRunning,
+        isIgnitionOn: monitoringStatus.isRunning,
         lastProbeAt: monitoringStatus.lastSampleAt
       }
     : null;

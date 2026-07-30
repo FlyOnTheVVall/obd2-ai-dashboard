@@ -1,0 +1,250 @@
+/*
+  Presentation cleanup overrides for BlackBoxDashboard.tsx.
+
+  This file is imported AFTER blackbox-dashboard.css so these rules win
+  without forcing you to rewrite the original stylesheet before the demo.
+*/
+
+/* The removed Home command card no longer needs reserved space. */
+.bb-main-stage {
+  min-height: 0;
+}
+
+.bb-scene-canvas,
+.bb-orbit-menu {
+  inset: 0 !important;
+}
+
+/* Defensive rule in case an older component still renders the card. */
+.bb-command-card {
+  display: none !important;
+}
+
+/* Make both right-rail panels shrink predictably inside the viewport. */
+.bb-right-rail {
+  min-height: 0;
+}
+
+.bb-panel {
+  min-width: 0;
+}
+
+.bb-activity-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Keep the title and controls fixed while the summary rows use the middle. */
+.bb-activity-panel .bb-panel-title {
+  flex: 0 0 auto;
+}
+
+.bb-activity-list {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: start;
+}
+
+.bb-activity-list > div {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+}
+
+.bb-activity-list > div + div {
+  border-top: 1px solid rgba(116, 165, 218, 0.12);
+}
+
+.bb-activity-list > div > span {
+  min-width: 0;
+}
+
+.bb-activity-list svg {
+  margin-top: 2px;
+  color: var(--bb-blue, #43a7ff);
+}
+
+.bb-activity-list strong,
+.bb-activity-list small {
+  display: block;
+}
+
+.bb-activity-list strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.bb-activity-list small {
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+/* The action row can no longer sit on top of the summary content. */
+.bb-activity-actions {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(116, 165, 218, 0.18);
+}
+
+.bb-activity-actions button {
+  min-width: 0;
+  min-height: 40px;
+  padding-inline: 6px;
+}
+
+/* Keep long metric labels from colliding with their values. */
+.bb-metric-list > div,
+.bb-metric-list > button {
+  gap: 12px;
+}
+
+.bb-metric-list > div > span,
+.bb-metric-list > button > span {
+  min-width: 0;
+}
+
+.bb-metric-list strong {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+/* Laptop-height adjustment used by the presentation layout. */
+@media (max-height: 820px) and (min-width: 1000px) {
+  .bb-activity-list > div {
+    padding: 6px 0;
+  }
+
+  .bb-activity-list small {
+    font-size: 11px;
+  }
+
+  .bb-activity-actions {
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+
+  .bb-activity-actions button {
+    min-height: 36px;
+  }
+}
+
+/* ===== Final lower-right panel repair ===== */
+
+.bb-activity-panel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.bb-activity-list {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  align-content: start !important;
+}
+
+/* Keep the compact Home summary from becoming overcrowded. */
+.bb-activity-list > div:nth-child(3),
+.bb-activity-list > div:nth-child(5) {
+  display: none !important;
+}
+
+.bb-activity-list > div {
+  padding: 9px 0 !important;
+}
+
+/* Cancel any absolute positioning inherited from the original stylesheet. */
+.bb-activity-actions {
+  position: static !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  padding-top: 10px !important;
+
+  border-top: 1px solid rgba(116, 165, 218, 0.18) !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.bb-activity-actions button {
+  min-width: 0 !important;
+  min-height: 38px !important;
+  padding: 7px 5px !important;
+}
+
+@media (max-height: 800px) and (min-width: 1000px) {
+  .bb-activity-list > div {
+    padding: 7px 0 !important;
+  }
+
+  .bb-activity-list small {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .bb-activity-actions {
+    padding-top: 8px !important;
+  }
+
+  .bb-activity-actions button {
+    min-height: 36px !important;
+  }
+}
+
+/* ===== Scrollable vehicle data summary ===== */
+
+.bb-activity-list {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding-right: 7px;
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(67, 167, 255, 0.55) transparent;
+}
+
+/* Restore all five summary rows so they can be reached by scrolling. */
+.bb-activity-list > div:nth-child(3),
+.bb-activity-list > div:nth-child(5) {
+  display: grid !important;
+}
+
+/* Chrome/Chromium scrollbar support */
+.bb-activity-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.bb-activity-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bb-activity-list::-webkit-scrollbar-thumb {
+  background: rgba(67, 167, 255, 0.55);
+  border-radius: 999px;
+}
+
+.bb-activity-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(67, 167, 255, 0.8);
+}

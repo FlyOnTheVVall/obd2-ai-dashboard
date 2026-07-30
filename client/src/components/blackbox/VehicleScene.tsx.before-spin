@@ -1,4 +1,4 @@
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
   AdaptiveDpr,
   Html,
@@ -7,7 +7,7 @@ import {
   useGLTF,
   useProgress
 } from "@react-three/drei";
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 const MODEL_URL = "/models/toyota_tundra_lowpoly.glb";
@@ -33,7 +33,6 @@ function LoadingModel() {
 }
 
 function TundraModel() {
-  const spinRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_URL);
 
   const prepared = useMemo(() => {
@@ -45,13 +44,11 @@ function TundraModel() {
       }
     });
 
-    const mesh = sourceMesh as THREE.Mesh | null;
-
-    if (!mesh) {
-        throw new Error("The optimized Tundra GLB does not contain a mesh.");
+    if (!sourceMesh) {
+      throw new Error("The optimized Tundra GLB does not contain a mesh.");
     }
 
-    const geometry = mesh.geometry as THREE.BufferGeometry;
+    const geometry = sourceMesh.geometry as THREE.BufferGeometry;
     const edgeGeometry = new THREE.EdgesGeometry(geometry, 18);
 
     const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -80,12 +77,6 @@ function TundraModel() {
     };
   }, [scene]);
 
-  useFrame((_, delta) => {
-    if (spinRef.current) {
-      spinRef.current.rotation.y += delta * 0.18;
-    }
-  });
-
   useEffect(() => {
     return () => {
       prepared.edgeGeometry.dispose();
@@ -95,12 +86,7 @@ function TundraModel() {
   }, [prepared]);
 
   return (
-    <group
-      ref={spinRef}
-      position={[0, -1.02, 0]}
-      rotation={[0, -0.62, 0]}
-      scale={0.94}
-    >
+    <group position={[0, -1.02, 0]} rotation={[0, -0.62, 0]} scale={0.94}>
       <mesh
         geometry={prepared.geometry}
         material={prepared.bodyMaterial}
@@ -197,7 +183,7 @@ function Scene() {
 export default function VehicleScene() {
   return (
     <Canvas
-      frameloop="always"
+      frameloop="demand"
       camera={{ position: [6.8, 4.15, 8.2], fov: 38 }}
       dpr={[0.55, 1]}
       gl={{
